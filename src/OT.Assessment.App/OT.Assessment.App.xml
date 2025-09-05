@@ -4,5 +4,21 @@
         <name>OT.Assessment.App</name>
     </assembly>
     <members>
+        <member name="M:OT.Assessment.App.Controllers.PlayerController.PostCasinoWager(OT.Assessment.Core.Dtos.CasinoWagerDto)">
+            <summary>
+            Submit a new Casino Wager. 
+            Publishes to RabbitMQ for ingestion by the Consumer.
+            </summary>
+        </member>
+        <member name="M:OT.Assessment.App.Controllers.PlayerController.GetCasinoWagers(System.Guid,System.Int32,System.Int32)">
+            <summary>
+            Get paged wagers for a specific player.
+            </summary>
+        </member>
+        <member name="M:OT.Assessment.App.Controllers.PlayerController.GetTopSpenders(System.Int32)">
+            <summary>
+            Get top N spenders.
+            </summary>
+        </member>
     </members>
 </doc>

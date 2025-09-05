@@ -15,7 +15,7 @@ namespace OT.Assessment.Infrastructure.Data
 
         public SqlConnection CreateConnection()
         {
-            var cs = _config.GetConnectionString("Default");
+            var cs = _config.GetConnectionString("DatabaseConnection");
             var conn = new SqlConnection(cs);
             return conn;
         }

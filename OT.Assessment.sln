@@ -12,7 +12,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7EFE3E75-8316-420D-AFA3-ECE90ECF22BB}"
 	ProjectSection(SolutionItems) = preProject
 		DatabaseGenerate.sql = DatabaseGenerate.sql
+		RabbitMQ.txt = RabbitMQ.txt
 		README.md = README.md
+		sample-casino-wager.txt = sample-casino-wager.txt
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{6FA7DAF4-446B-4610-9EDF-6E418255B176}"

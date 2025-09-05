@@ -1,0 +1,7 @@
+Go to: http://localhost:15672
+
+Log in with:
+
+Username: guest
+
+Password: guest

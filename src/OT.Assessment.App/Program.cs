@@ -53,29 +53,29 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-// POST -> publish to queue
-app.MapPost("/api/player/casinowager", async (CasinoWagerDto dto, RabbitMqPublisher publisher, WagerService svc) =>
-{
-    // perform light validation via service (or before publishing)
-    await svc.InsertWagerAsync(dto); // optional: we might not want to insert here; instead validate only
-    // NOTE: if you want API-only publish (consumer writes DB), remove the InsertWagerAsync call above.
-    // For the assessment we only publish and let consumer write, so better to validate and publish only:
-    await publisher.PublishAsync("ot.casino.wager", dto);
-    return Results.Accepted();
-}).WithOpenApi();
+//// POST -> publish to queue
+//app.MapPost("/api/player/casinowager", async (CasinoWagerDto dto, RabbitMqPublisher publisher, WagerService svc) =>
+//{
+//    // perform light validation via service (or before publishing)
+//    await svc.InsertWagerAsync(dto); // optional: we might not want to insert here; instead validate only
+//    // NOTE: if you want API-only publish (consumer writes DB), remove the InsertWagerAsync call above.
+//    // For the assessment we only publish and let consumer write, so better to validate and publish only:
+//    await publisher.PublishAsync("ot.casino.wager", dto);
+//    return Results.Accepted();
+//}).WithOpenApi();
 
-// GET paged wagers for player (reads DB directly via service)
-app.MapGet("/api/player/{playerId:guid}/casino", async (Guid playerId, int page, int pageSize, WagerService svc) =>
-{
-    var res = await svc.GetPlayerWagersAsync(playerId, page, pageSize);
-    return Results.Ok(res);
-}).WithOpenApi();
+//// GET paged wagers for player (reads DB directly via service)
+//app.MapGet("/api/player/{playerId:guid}/casino", async (Guid playerId, int page, int pageSize, WagerService svc) =>
+//{
+//    var res = await svc.GetPlayerWagersAsync(playerId, page, pageSize);
+//    return Results.Ok(res);
+//}).WithOpenApi();
 
-app.MapGet("/api/player/topSpenders", async (int count, WagerService svc) =>
-{
-    var data = await svc.GetTopSpendersAsync(count);
-    return Results.Ok(data);
-}).WithOpenApi();
+//app.MapGet("/api/player/topSpenders", async (int count, WagerService svc) =>
+//{
+//    var data = await svc.GetTopSpendersAsync(count);
+//    return Results.Ok(data);
+//}).WithOpenApi();
 
 app.UseHttpsRedirection();
 
