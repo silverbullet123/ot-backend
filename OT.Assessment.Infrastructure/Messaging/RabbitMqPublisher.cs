@@ -40,47 +40,69 @@ namespace OT.Assessment.Infrastructure.Messaging
                         _logger.LogWarning(ex, "Retry {Attempt} after {Delay} due to publish failure", attempt, ts);
                     });
 
-            InitializeConnection();
+            EnsureConnected();
+        }
+
+        private void EnsureConnected()
+        {
+            lock (_syncRoot)
+            {
+                try
+                {
+                    if (_connection == null || !_connection.IsOpen)
+                    {
+                        InitializeConnection();
+                    }
+
+                    if (_channel == null || !_channel.IsOpen)
+                    {
+                        _channel?.Dispose();
+                        _channel = CreateChannel();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to ensure RabbitMQ connection/channel");
+                    throw;
+                }
+            }
         }
 
         private void InitializeConnection()
         {
             lock (_syncRoot)
             {
-                try
+                var factory = new ConnectionFactory
                 {
-                    if (_connection != null && _connection.IsOpen) return;
+                    HostName = _opts.HostName,
+                    Port = _opts.Port,
+                    UserName = _opts.UserName,
+                    Password = _opts.Password,
+                    DispatchConsumersAsync = true,
+                    AutomaticRecoveryEnabled = true,
+                    NetworkRecoveryInterval = TimeSpan.FromSeconds(10),
+                    TopologyRecoveryEnabled = true
+                };
 
-                    var factory = new ConnectionFactory
-                    {
-                        HostName = _opts.HostName,
-                        Port = _opts.Port,
-                        UserName = _opts.UserName,
-                        Password = _opts.Password,
-                        DispatchConsumersAsync = true,
-                        AutomaticRecoveryEnabled = true,
-                        NetworkRecoveryInterval = TimeSpan.FromSeconds(10),
-                        TopologyRecoveryEnabled = true
-                    };
-
-                    _connection?.Dispose();
-                    _connection = factory.CreateConnection();
-                    _logger.LogInformation("RabbitMQ connection established");
-
-                    _channel?.Dispose();
-                    _channel = CreateChannel();
-                }
-                catch (Exception ex)
+                _connection?.Dispose();
+                _connection = factory.CreateConnection();
+                _connection.ConnectionShutdown += (s, ea) =>
                 {
-                    _logger.LogError(ex, "Failed to initialize RabbitMQ connection/channel");
-                    throw;
-                }
+                    _logger.LogWarning("RabbitMQ connection shutdown: {Reason}", ea.ReplyText);
+                    _connection = null;
+                    _channel = null;
+                };
+
+                _logger.LogInformation("RabbitMQ connection established");
             }
         }
 
         private IModel CreateChannel()
         {
-            var channel = _connection!.CreateModel();
+            if (_connection == null)
+                throw new InvalidOperationException("RabbitMQ connection is not initialized");
+
+            var channel = _connection.CreateModel();
 
             // Dead letter setup
             channel.ExchangeDeclare(DeadLetterExchange, ExchangeType.Direct, durable: true);
@@ -104,52 +126,42 @@ namespace OT.Assessment.Infrastructure.Messaging
             // Fair dispatch
             channel.BasicQos(0, 1, false);
 
-            _logger.LogInformation("RabbitMQ channel created. Exchange={Exchange}, Queue={Queue}, DLQ={DeadLetterQueue}",
+            channel.ModelShutdown += (s, ea) =>
+            {
+                _logger.LogWarning("RabbitMQ channel shutdown: {ReplyText}", ea.ReplyText);
+                _channel = null;
+            };
+
+            _logger.LogInformation(
+                "RabbitMQ channel created. Exchange={Exchange}, Queue={Queue}, DLQ={DeadLetterQueue}",
                 _opts.Exchange, _opts.Queue, DeadLetterQueue);
 
             return channel;
-        }
-
-        private IModel GetOrCreateChannel()
-        {
-            lock (_syncRoot)
-            {
-                if (_connection == null || !_connection.IsOpen)
-                {
-                    _logger.LogWarning("RabbitMQ connection is closed. Reinitializing...");
-                    InitializeConnection();
-                }
-
-                if (_channel == null || !_channel.IsOpen)
-                {
-                    _logger.LogWarning("RabbitMQ channel is closed. Recreating...");
-                    _channel?.Dispose();
-                    _channel = CreateChannel();
-                }
-
-                return _channel;
-            }
         }
 
         public async Task PublishAsync(string routingKey, object message)
         {
             await _retryPolicy.ExecuteAsync(async () =>
             {
-                var channel = GetOrCreateChannel();
+                EnsureConnected();
+
+                if (_channel == null)
+                    throw new InvalidOperationException("RabbitMQ channel is not available");
 
                 var payload = JsonSerializer.SerializeToUtf8Bytes(message);
-                var props = channel.CreateBasicProperties();
+                var props = _channel.CreateBasicProperties();
                 props.Persistent = true;
 
-                channel.BasicPublish(
+                _channel.BasicPublish(
                     exchange: _opts.Exchange,
                     routingKey: routingKey,
                     mandatory: false,
                     basicProperties: props,
-                    body: payload
-                );
+                    body: payload);
 
-                _logger.LogInformation("Message published to {Exchange} with routingKey={RoutingKey}", _opts.Exchange, routingKey);
+                _logger.LogInformation(
+                    "Message published to {Exchange} with routingKey={RoutingKey}",
+                    _opts.Exchange, routingKey);
 
                 await Task.CompletedTask;
             });
