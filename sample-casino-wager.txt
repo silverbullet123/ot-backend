@@ -16,3 +16,41 @@
   "sessionData": "Central Chile Awesome Cotton Gloves cross-platform Handmade Rubber Shoes portals leading-edge Coordinator Data Producer end-to-end encoding Gorgeous Clothing View Health, Outdoors & Music embrace Metrics Facilitator morph",
   "duration": 1827254
 }
+
+{
+  "wagerId": "c4b123ef-2b02-4d8e-8a57-e1234567890a",
+  "theme": "fantasy",
+  "provider": "Dynamic Pixel Platypus",
+  "gameName": "Galactic Gems",
+  "transactionId": "b8d9c0e1-45f6-4789-a012-b34567890123",
+  "brandId": "c1d2e3f4-a5b6-4c7d-8e9f-0a1b2c3d4e5f",
+  "accountId": "6bc86abc-34f0-38e2-c771-28a0ff81114e",
+  "username": "Alex.Smith22",
+  "externalReferenceId": "d9e8f7a6-b5c4-4d3e-2f10-987654321fed",
+  "transactionTypeId": "9bbfdf1d-6e64-5336-b048-bec565d5eb42",
+  "amount": 15420.50,
+  "createdDateTime": "2025-09-06T08:25:10Z",
+  "numberOfBets": 5,
+  "countryCode": "ZA",
+  "sessionData": "Next-generation monitor Intelligent Concrete Tuna user-centric Applications Account online solution withdrawal paradigm harness payment Assistant Fresh Salad reboot",
+  "duration": 2105398
+}
+
+{
+  "wagerId": "e5c234ab-3c13-5e9f-9b68-f234567890bc",
+  "theme": "mythology",
+  "provider": "Quantum Fox Gaming",
+  "gameName": "Zeus's Golden Thunder",
+  "transactionId": "c9eac1f2-56a7-5890-b123-c45678901234",
+  "brandId": "d2e3f4a5-b6c7-5d8e-9f0a-1b2c3d4e5f60",
+  "accountId": "7cd97bcd-45a1-49f3-d882-39b1aa92225f",
+  "username": "Sam.Jones88",
+  "externalReferenceId": "e0f9a8b7-c6d5-5e4f-3a21-0987654321ab",
+  "transactionTypeId": "a0caff2e-7f75-6447-c159-cfd676e6fc53",
+  "amount": 250.75,
+  "createdDateTime": "2025-09-06T10:35:00Z",
+  "numberOfBets": 1,
+  "countryCode": "CA",
+  "sessionData": "Synergistic framework for mobile initiatives. Leveraging cross-platform synergies to enhance user engagement. B2C matrix with scalable solutions.",
+  "duration": 85432
+}

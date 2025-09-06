@@ -24,9 +24,7 @@ builder.Services.AddScoped<WagerService>();
 // Rabbit publisher
 builder.Services.AddSingleton<RabbitMqPublisher>();
 
-// swagger
-//builder.Services.AddEndpointsApiExplorer();
-//builder.Services.AddSwaggerGen();
+builder.Services.AddSingleton<HttpClient>(); 
 
 builder.Services.AddControllers();
 
