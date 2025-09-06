@@ -26,7 +26,9 @@ var host = Host.CreateDefaultBuilder(args)
         services.AddScoped<WagerService>();
         services.AddSingleton<RabbitMqPublisher>();
         services.AddHostedService<RabbitMqConsumer>();
-        services.AddHostedService<DeadLetterWorker>();
+        services.AddHostedService<DeadLetterConsumer>();
+        services.AddScoped<FailedWagerService>();
+        services.AddScoped<IFailedWagerRepository, FailedWagerRepository>();
 
     })
     .Build();

@@ -54,3 +54,41 @@
   "sessionData": "Synergistic framework for mobile initiatives. Leveraging cross-platform synergies to enhance user engagement. B2C matrix with scalable solutions.",
   "duration": 85432
 }
+
+{
+  "wagerId": "11223344-5566-7788-99aa-bbccddeeff00",
+  "theme": "horror",
+  "provider": "Spectral Software Solutions",
+  "gameName": "Crypt of the Vampire King",
+  "transactionId": "22334455-6677-8899-aabb-ccddeeff0011",
+  "brandId": "33445566-7788-99aa-bbcc-ddeeff001122",
+  "accountId": "8de08cde-56b2-50a4-e993-4ab2bb03336a",
+  "username": "Maria.Garcia01",
+  "externalReferenceId": "44556677-8899-aabb-ccdd-eeff00112233",
+  "transactionTypeId": "b1dbdd3f-8a86-7558-d260-dfe787f7ad64",
+  "amount": 5000.00,
+  "createdDateTime": "2025-09-06T10:19:55Z",
+  "numberOfBets": 10,
+  "countryCode": "DE",
+  "sessionData": "User-centric 24/7 architecture with proactive functionalities. Holistic client-server throughput and mission-critical info-mediaries.",
+  "duration": 315678
+}
+
+{
+  "wagerId": "a1b2c3d4-e5f6-a7b8-c9d0-e1f2a3b4c5d6",
+  "theme": "classic_slots",
+  "provider": "Retro Reel Innovations",
+  "gameName": "Lucky 7s Deluxe",
+  "transactionId": "b2c3d4e5-f6a7-b8c9-d0e1-f2a3b4c5d6e7",
+  "brandId": "c3d4e5f6-a7b8-c9d0-e1f2-a3b4c5d6e7f8",
+  "accountId": "9ef19def-67c3-61b5-f004-5bc3cc14447b",
+  "username": "chen_wei99",
+  "externalReferenceId": "d4e5f6a7-b8c9-d0e1-f2a3-b4c5d6e7f8a9",
+  "transactionTypeId": "c2ecee4a-9b97-8669-e371-efa898a8be75",
+  "amount": 10.25,
+  "createdDateTime": "2025-09-06T12:02:45Z",
+  "numberOfBets": 1,
+  "countryCode": "ZA",
+  "sessionData": "Optimized logistical challenge. Implemented secondary attitude-oriented monitoring. Object-based asynchronous protocol.",
+  "duration": 35120
+}

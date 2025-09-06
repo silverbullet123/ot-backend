@@ -21,6 +21,10 @@ builder.Services.AddSingleton<DapperConnectionFactory>();
 builder.Services.AddScoped<IWagerRepository, WagerRepository>();
 builder.Services.AddScoped<WagerService>();
 
+builder.Services.AddScoped<IFailedWagerRepository, FailedWagerRepository>();
+builder.Services.AddScoped<FailedWagerService>();
+
+
 // Rabbit publisher
 builder.Services.AddSingleton<RabbitMqPublisher>();
 

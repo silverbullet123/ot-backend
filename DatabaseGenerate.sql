@@ -18,6 +18,8 @@ IF OBJECT_ID('dbo.Game', 'U') IS NOT NULL DROP TABLE dbo.Game;
 IF OBJECT_ID('dbo.Provider', 'U') IS NOT NULL DROP TABLE dbo.Provider;
 IF OBJECT_ID('dbo.Brand', 'U') IS NOT NULL DROP TABLE dbo.Brand;
 IF OBJECT_ID('dbo.Player', 'U') IS NOT NULL DROP TABLE dbo.Player;
+IF OBJECT_ID('dbo.FailedWagers ', 'U') IS NOT NULL DROP TABLE dbo.FailedWagers;
+
 GO
 
 CREATE TABLE dbo.Player (
@@ -64,6 +66,27 @@ CREATE TABLE dbo.Wager (
     CONSTRAINT FK_Wager_Player FOREIGN KEY (AccountId) REFERENCES dbo.Player(AccountId),
     CONSTRAINT FK_Wager_Brand FOREIGN KEY (BrandId) REFERENCES dbo.Brand(BrandId),
     CONSTRAINT FK_Wager_Game FOREIGN KEY (GameId) REFERENCES dbo.Game(GameId)
+);
+GO
+
+CREATE TABLE FailedWagers (
+    Id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    WagerId UNIQUEIDENTIFIER NOT NULL,
+    TransactionId UNIQUEIDENTIFIER NOT NULL,
+    AccountId UNIQUEIDENTIFIER NOT NULL,
+    BrandId UNIQUEIDENTIFIER NOT NULL,
+    Username NVARCHAR(100),
+    CountryCode NVARCHAR(10),
+    GameName NVARCHAR(100),
+    Theme NVARCHAR(100),
+    ProviderName NVARCHAR(100),
+    Amount DECIMAL(18,2) NOT NULL,
+    NumberOfBets INT,
+    DurationMs INT,
+    SessionData NVARCHAR(MAX),
+    RawMessage NVARCHAR(MAX) NOT NULL,
+    CreatedDateTime DATETIME2 NOT NULL,
+    CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
 );
 GO
 

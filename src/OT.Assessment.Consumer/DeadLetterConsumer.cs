@@ -1,20 +1,25 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using OT.Assessment.Application.Services;
+using OT.Assessment.Core.Dtos;
 using OT.Assessment.Infrastructure.Options;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
 
 namespace OT.Assessment.Consumer
 {
-    public class DeadLetterWorker : BackgroundService
+    public class DeadLetterConsumer : BackgroundService
     {
-        private readonly ILogger<DeadLetterWorker> _logger;
+        private readonly ILogger<DeadLetterConsumer> _logger;
+        private readonly IServiceProvider _sp;
         private readonly RabbitMqOptions _opts;
         private IConnection? _connection;
         private IModel? _channel;
@@ -22,9 +27,10 @@ namespace OT.Assessment.Consumer
         private const string DeadLetterExchange = "dlx.direct";
         private const string DeadLetterQueue = "poison.queue";
 
-        public DeadLetterWorker(ILogger<DeadLetterWorker> logger, IOptions<RabbitMqOptions> opts)
+        public DeadLetterConsumer(ILogger<DeadLetterConsumer> logger, IServiceProvider sp, IOptions<RabbitMqOptions> opts)
         {
             _logger = logger;
+            _sp = sp;
             _opts = opts.Value;
         }
 
@@ -38,19 +44,18 @@ namespace OT.Assessment.Consumer
                 Password = _opts.Password,
                 DispatchConsumersAsync = true,
                 AutomaticRecoveryEnabled = true,
-                NetworkRecoveryInterval = TimeSpan.FromSeconds(10),
-                TopologyRecoveryEnabled = true
+                NetworkRecoveryInterval = TimeSpan.FromSeconds(10)
             };
 
             _connection = factory.CreateConnection();
             _channel = _connection.CreateModel();
 
-            // Make sure DLX exists
             _channel.ExchangeDeclare(DeadLetterExchange, ExchangeType.Direct, durable: true);
             _channel.QueueDeclare(DeadLetterQueue, durable: true, exclusive: false, autoDelete: false);
             _channel.QueueBind(DeadLetterQueue, DeadLetterExchange, "poison");
 
-            _logger.LogInformation("DeadLetterWorker started. Listening to {DeadLetterQueue}", DeadLetterQueue);
+            _channel.BasicQos(0, 10, false); // max 10 unacked messages
+            _logger.LogInformation("DLQ Consumer started. Queue={Queue}", DeadLetterQueue);
 
             return base.StartAsync(cancellationToken);
         }
@@ -62,26 +67,22 @@ namespace OT.Assessment.Consumer
             var consumer = new AsyncEventingBasicConsumer(_channel);
             consumer.Received += async (sender, ea) =>
             {
-                var body = ea.Body.ToArray();
-                var message = Encoding.UTF8.GetString(body);
+                using var scope = _sp.CreateScope();
+                var failedSvc = scope.ServiceProvider.GetRequiredService<FailedWagerService>();
 
                 try
                 {
-                    // Just log it for now
-                    _logger.LogWarning("DLQ message received: {Message}", message);
-
-                    // Optionally deserialize for further inspection
-                    // var obj = JsonSerializer.Deserialize<CasinoWagerDto>(message);
+                    var json = Encoding.UTF8.GetString(ea.Body.Span);
+                    var dto = JsonSerializer.Deserialize<CasinoWagerDto>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
+                    await failedSvc.SaveFailedWagerAsync(dto);
 
                     _channel.BasicAck(ea.DeliveryTag, false);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Failed to process DLQ message. Requeueing...");
-                    _channel.BasicNack(ea.DeliveryTag, false, requeue: true);
+                    _logger.LogError(ex, "Error processing DLQ message");
+                    _channel.BasicNack(ea.DeliveryTag, false, requeue: false);
                 }
-
-                await Task.Yield();
             };
 
             _channel.BasicConsume(queue: DeadLetterQueue, autoAck: false, consumer: consumer);
@@ -90,17 +91,8 @@ namespace OT.Assessment.Consumer
 
         public override void Dispose()
         {
-            try
-            {
-                _channel?.Close();
-                _connection?.Close();
-                _logger.LogInformation("DeadLetterWorker disposed");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error disposing DeadLetterWorker");
-            }
-
+            _channel?.Close();
+            _connection?.Close();
             base.Dispose();
         }
     }
